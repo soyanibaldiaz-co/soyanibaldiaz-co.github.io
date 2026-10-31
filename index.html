@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Proyección mensual del negocio: ventas, costos, gastos y utilidad. Por Aníbal Díaz @soyanibaldiaz">
+<title>Proyección Mensual del Negocio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: una columna tipo app (como Ventas/Cuadres): venta arriba, estado de resultados como lista editable, utilidad al final */
+:root{
+  --bg:#0b0b0a; --panel:#171612; --panel2:#201e18; --line:#2c2a22;
+  --fg:#f4f1e8; --mut:#a39e8c; --oro:#f2b90f; --oro-t:#ffd24d;
+  --bien:#2ecc71; --mal:#ff5a4f;
+  --display:"Archivo Black","Arial Black",system-ui,sans-serif;
+  --body:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1;margin:0;letter-spacing:.2px;text-wrap:balance}
+h1 span{color:var(--oro)}
+.sub{color:var(--mut);font-size:13px;margin-top:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.lbl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.sedes{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.sedes button{flex:none;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.sedes button[aria-pressed="true"]{background:var(--oro);color:#1a1300;border-color:var(--oro)}
+.campos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.campo{display:flex;flex-direction:column;gap:5px;min-width:0}
+.campo label{font-size:12px;font-weight:700;color:var(--mut)}
+input{width:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-weight:700;font-variant-numeric:tabular-nums}
+input:focus-visible,button:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+.nota{color:var(--mut);font-size:12px;margin-top:10px;line-height:1.45}
+.res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.res div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px;min-width:0}
+.res b{display:block;font-family:var(--display);font-weight:400;font-size:19px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.res small{color:var(--mut);font-weight:700;font-size:12px}
+.res .ut b{color:var(--bien)} .res .ut.neg b{color:var(--mal)}
+.barra{display:flex;height:12px;border-radius:7px;overflow:hidden;background:var(--panel2);margin-top:12px}
+.barra i{display:block;height:100%}
+.ley{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--mut)}
+.ley span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);text-align:right;padding:0 0 8px}
+th:first-child{text-align:left}
+td{padding:7px 0;border-top:1px solid var(--line);vertical-align:middle}
+td.n{font-size:14px;padding-right:8px}
+td.p{width:78px}
+td.p input{padding:7px 8px;text-align:right;font-size:14px}
+td.v{text-align:right;width:118px;font-weight:700;white-space:nowrap}
+tr.sum td{border-top:2px solid var(--oro);font-weight:800;color:var(--oro-t)}
+tr.sum td.n{font-size:15px}
+tr.sec td{padding-top:16px;border-top:0}
+tr.sec td.n{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+tr.ut td{border-top:2px solid var(--bien);font-family:var(--display);font-weight:400;font-size:17px;color:var(--bien)}
+tr.ut.neg td{border-top-color:var(--mal);color:var(--mal)}
+tr.ut td.pct{color:inherit}
+.pct{text-align:right;color:var(--mut);font-weight:700;padding-right:8px}
+.acciones{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{background:transparent;color:var(--oro);border:1px solid var(--oro);border-radius:10px;padding:9px 14px;font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.aviso{font-size:12px;font-weight:700;color:var(--mal)}
+.aviso.ok{color:var(--mut)}
+.pie{text-align:center;color:var(--mut);font-size:13px;padding-top:6px}
+.pie b{color:var(--fg)} .pie span{color:var(--oro);font-weight:700}
+@media (max-width:420px){ td.v{width:104px;font-size:14px} td.p{width:70px} .res b{font-size:16px} }
+@media (prefers-reduced-motion:no-preference){ .barra i{transition:width .25s ease} }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Proyección <span>mensual</span></h1>
+      <div class="sub">Estado de resultados proyectado para tu negocio. Escribe tu venta del mes y mira a dónde se va cada peso.</div>
+    </div>
+  </header>
+
+  <section class="card" aria-label="Venta del mes">
+    <div class="lbl">Tu venta del mes</div>
+    <div class="campos">
+      <div class="campo"><label for="venta">Venta neta del mes ($)</label><input id="venta" inputmode="numeric" autocomplete="off"></div>
+      <div class="campo"><label for="pdom">% ventas domicilio</label><input id="pdom" inputmode="decimal" autocomplete="off"></div>
+    </div>
+    <div class="nota" id="split"></div>
+  </section>
+
+  <section class="res" aria-label="Resumen">
+    <div><small>Contribución</small><b id="rContrib">–</b><small id="rContribP"></small></div>
+    <div><small>Gastos operac.</small><b id="rGastos">–</b><small id="rGastosP"></small></div>
+    <div class="ut" id="rUtBox"><small>Utilidad</small><b id="rUt">–</b><small id="rUtP"></small></div>
+  </section>
+
+  <section class="card" aria-label="Estado de resultados">
+    <div class="lbl">Cómo se reparte cada $100 de venta</div>
+    <div class="barra" id="barra" aria-hidden="true"></div>
+    <div class="ley"><span style="--c:#8a6d12">Costo mercancía</span><span style="--c:#5b5648">Gastos operacionales</span><span style="--c:var(--bien)">Utilidad</span></div>
+  </section>
+
+  <section class="card" aria-label="Detalle">
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Rubro</th><th>% venta</th><th>Valor</th></tr></thead>
+        <tbody id="tabla"></tbody>
+      </table>
+    </div>
+    <div class="acciones" style="margin-top:14px">
+      <span class="aviso ok" id="aviso">Son % de referencia. Ajústalos a tu negocio.</span>
+      <button class="btn" id="reset" type="button">Volver a los % de referencia</button>
+    </div>
+  </section>
+  <footer class="pie">Herramienta creada por <b>Aníbal Díaz</b> · <span>@soyanibaldiaz</span></footer>
+</div>
+
+<script>
+(function(){
+  var EJEMPLO = 50000000;   // venta de ejemplo hasta que la persona escriba la suya
+  // Porcentajes de referencia (archivo Proyección)
+  var BASE = {
+    dom: 20, costo: 35,
+    gastos: [
+      ['nomina','Nómina, salarios y personal',18],
+      ['honor','Honorarios',1],
+      ['ica','Industria y Comercio · impuestos locales',1],
+      ['arriendo','Arriendos de locales',10],
+      ['plataforma','Arriendo de plataforma',4],
+      ['afil','Afiliaciones y administración',2],
+      ['servicios','Servicios públicos',3.5],
+      ['correo','Correo, logística, transporte y mensajería',1],
+      ['publi','Publicidad y propaganda',2],
+      ['diversos','Diversos',0.5],
+      ['mant','Mantenimiento y reparaciones',1],
+      ['aseo','Aseo y cafetería (suministros)',4],
+      ['banco','Gastos bancarios, comisiones, GMF',1]
+    ]
+  };
+  var KEY = 'proyeccion_negocio_v1';
+  var st = {propia:false, venta:EJEMPLO, dom:BASE.dom, costo:BASE.costo, g:{}};
+  BASE.gastos.forEach(function(x){ st.g[x[0]] = x[2]; });
+  try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.g) st = Object.assign(st, s); } catch(e){}
+
+  function guardar(){ try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e){} }
+  function $(n){ return (n<0?'-':'') + '$' + Math.abs(Math.round(n||0)).toLocaleString('es-CO'); }
+  function M(n){ return (n<0?'-':'') + '$' + (Math.abs(n||0)/1e6).toLocaleString('es-CO',{maximumFractionDigits:1}) + ' M'; }
+  function p(n){ return (Math.round(n*10)/10).toLocaleString('es-CO',{maximumFractionDigits:1}) + '%'; }
+  function num(s){ var x = String(s||'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'); var v = parseFloat(x); return isNaN(v)?0:v; }
+  function pnum(s){ var v = parseFloat(String(s||'').replace('%','').replace(',','.')); return isNaN(v)?0:v; }
+  function fmtP(v){ return String(v).replace('.',','); }
+
+  var elVenta = document.getElementById('venta'), elDom = document.getElementById('pdom');
+
+  function tabla(){
+    var h = '<tr><td class="n">Ventas punto de venta</td><td class="pct" id="pPV"></td><td class="v" id="vPV"></td></tr>'
+          + '<tr><td class="n">Ventas domicilio</td><td class="pct" id="pDO"></td><td class="v" id="vDO"></td></tr>'
+          + '<tr class="sum"><td class="n">Ventas netas</td><td class="pct">100%</td><td class="v" id="vVN"></td></tr>'
+          + '<tr><td class="n">Costo de mercancía vendida</td><td class="p"><input id="i-costo" inputmode="decimal" aria-label="% costo de mercancía" value="'+fmtP(st.costo)+'"></td><td class="v" id="v-costo"></td></tr>'
+          + '<tr class="sum"><td class="n">Contribución</td><td class="pct" id="pCO"></td><td class="v" id="vCO"></td></tr>'
+          + '<tr class="sec"><td class="n" colspan="3">Gastos operacionales</td></tr>';
+    BASE.gastos.forEach(function(x){
+      h += '<tr><td class="n">'+x[1]+'</td><td class="p"><input id="i-'+x[0]+'" data-g="'+x[0]+'" inputmode="decimal" aria-label="% '+x[1]+'" value="'+fmtP(st.g[x[0]])+'"></td><td class="v" id="v-'+x[0]+'"></td></tr>';
+    });
+    h += '<tr class="sum"><td class="n">Total gastos operacionales</td><td class="pct" id="pTG"></td><td class="v" id="vTG"></td></tr>'
+       + '<tr class="ut" id="trUt"><td class="n">Utilidad</td><td class="pct" id="pUT" style="color:inherit"></td><td class="v" id="vUT"></td></tr>';
+    document.getElementById('tabla').innerHTML = h;
+  }
+  document.getElementById('tabla').addEventListener('input', function(e){
+    var t = e.target; if (t.tagName !== 'INPUT') return;
+    if (t.id === 'i-costo') st.costo = pnum(t.value); else if (t.dataset.g) st.g[t.dataset.g] = pnum(t.value);
+    calcular(); guardar();
+  });
+
+  elVenta.addEventListener('input', function(){ st.venta = num(elVenta.value); st.propia = true; calcular(); guardar(); });
+  elVenta.addEventListener('blur', function(){ elVenta.value = $(st.venta).replace('$',''); });
+  elDom.addEventListener('input', function(){ st.dom = Math.min(100, Math.max(0, pnum(elDom.value))); calcular(); guardar(); });
+
+  document.getElementById('reset').addEventListener('click', function(){
+    st.dom = BASE.dom; st.costo = BASE.costo; BASE.gastos.forEach(function(x){ st.g[x[0]] = x[2]; });
+    elDom.value = fmtP(st.dom); tabla(); calcular(); guardar();
+  });
+
+  function set(id, v){ var e = document.getElementById(id); if (e) e.textContent = v; }
+
+  function calcular(){
+    var V = st.venta, dom = st.dom;
+    var pv = V*(100-dom)/100, dv = V*dom/100;
+    set('pPV', p(100-dom)); set('vPV', $(pv)); set('pDO', p(dom)); set('vDO', $(dv)); set('vVN', $(V));
+    set('split', (st.propia ? '' : 'Venta de ejemplo: escribe la tuya arriba. ') + 'Punto de venta ' + $(pv) + ' · Domicilio ' + $(dv));
+    var costo = V*st.costo/100, contrib = V - costo, pc = 100 - st.costo;
+    set('v-costo', $(costo)); set('pCO', p(pc)); set('vCO', $(contrib));
+    var tg = 0, ptg = 0;
+    BASE.gastos.forEach(function(x){ var pg = st.g[x[0]]||0; ptg += pg; tg += V*pg/100; set('v-'+x[0], $(V*pg/100)); });
+    var ut = contrib - tg, pu = pc - ptg;
+    set('pTG', p(ptg)); set('vTG', $(tg)); set('pUT', p(pu)); set('vUT', $(ut));
+    document.getElementById('trUt').classList.toggle('neg', ut < 0);
+    set('rContrib', M(contrib)); set('rContribP', p(pc) + ' de la venta');
+    set('rGastos', M(tg)); set('rGastosP', p(ptg) + ' de la venta');
+    set('rUt', M(ut)); set('rUtP', p(pu) + ' de la venta');
+    document.getElementById('rUtBox').classList.toggle('neg', ut < 0);
+    var b = document.getElementById('barra'), w = function(x){ return Math.max(0, Math.min(100, x)); };
+    b.innerHTML = '<i style="width:'+w(st.costo)+'%;background:#8a6d12"></i><i style="width:'+w(ptg)+'%;background:#5b5648"></i><i style="width:'+w(pu)+'%;background:var(--bien)"></i>';
+    var a = document.getElementById('aviso');
+    var cambiado = st.dom!==BASE.dom || st.costo!==BASE.costo || BASE.gastos.some(function(x){ return st.g[x[0]]!==x[2]; });
+    if (pu < 0){ a.className = 'aviso'; a.textContent = 'Con estos % el mes da pérdida: los costos y gastos suman ' + p(st.costo+ptg) + ' de la venta.'; }
+    else { a.className = 'aviso ok'; a.textContent = cambiado ? 'Cambiaste algunos %. Este celular los recuerda.' : 'Son % de referencia. Ajústalos a tu negocio.'; }
+  }
+
+  tabla();
+  elVenta.value = $(st.venta).replace('$',''); elDom.value = fmtP(st.dom);
+  calcular();
+})();
+</script>
+
+</body>
+</html>
